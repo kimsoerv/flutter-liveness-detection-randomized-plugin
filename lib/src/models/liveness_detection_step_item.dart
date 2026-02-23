@@ -4,22 +4,27 @@ class LivenessDetectionStepItem {
   final LivenessDetectionStep step;
   final String title;
   final double? thresholdToCheck;
+  /// Optional icon (e.g. SvgPicture, Image.asset for PNG).
+  final Widget? icon;
 
   LivenessDetectionStepItem({
     required this.step,
     required this.title,
     this.thresholdToCheck,
+    this.icon,
   });
 
   LivenessDetectionStepItem copyWith({
     LivenessDetectionStep? step,
     String? title,
     double? thresholdToCheck,
+    Widget? icon,
   }) {
     return LivenessDetectionStepItem(
       step: step ?? this.step,
       title: title ?? this.title,
       thresholdToCheck: thresholdToCheck ?? this.thresholdToCheck,
+      icon: icon ?? this.icon,
     );
   }
   Map<String, dynamic> toMap() {
@@ -59,13 +64,15 @@ class LivenessDetectionStepItem {
     return other is LivenessDetectionStepItem &&
         other.step == step &&
         other.title == title &&
-        other.thresholdToCheck == thresholdToCheck;
+        other.thresholdToCheck == thresholdToCheck &&
+        other.icon == icon;
   }
 
   @override
   int get hashCode {
     return step.hashCode ^
-    title.hashCode ^
-    thresholdToCheck.hashCode;
+        title.hashCode ^
+        thresholdToCheck.hashCode ^
+        icon.hashCode;
   }
 }

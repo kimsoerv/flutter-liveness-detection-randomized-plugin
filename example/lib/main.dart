@@ -1,3 +1,4 @@
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_liveness_detection_randomized_plugin/index.dart';
 
 void main() {
@@ -101,7 +102,7 @@ class _HomeViewState extends State<HomeView> {
       case 2:
         return 'Dark mode + High resolution + No info';
       case 3:
-        return 'Custom labels: All steps with Indonesian';
+        return 'Custom labels: All steps with icons and English wording';
       case 4:
         return 'Skip steps: Only 3 challenges (blink, smile, lookUp)';
       case 5:
@@ -109,7 +110,7 @@ class _HomeViewState extends State<HomeView> {
       case 6:
         return 'Max brightness off + No snackbar + Hide steps';
       case 7:
-        return 'All features: Custom + Timer + Cooldown + Dark';
+        return 'All features: Custom labels with icons + Timer + Cooldown + Dark';
       default:
         return '';
     }
@@ -177,12 +178,32 @@ class _HomeViewState extends State<HomeView> {
           isDarkMode: false,
           showCurrentStep: true,
           customizedLabel: LivenessDetectionLabelModel(
-            blink: 'Kedip 2-3 Kali',
-            lookDown: 'Lihat ke Bawah',
-            lookLeft: 'Lihat ke Kiri',
-            lookRight: 'Lihat ke Kanan',
-            lookUp: 'Lihat ke Atas',
-            smile: 'Tersenyum Lebar',
+            blink: 'Please blink your eyes',
+            iconBlink: SvgPicture.asset(
+              'assets/image/ic_blink.svg',
+              height: 28,
+              width: 28,
+            ),
+            lookDown: 'Look down',
+            lookLeft: 'Turn your head to the left',
+            iconLookLeft: SvgPicture.asset(
+              'assets/image/ic_left.svg',
+              height: 28,
+              width: 28,
+            ),
+            lookRight: 'Turn your head to the right',
+            iconLookRight: SvgPicture.asset(
+              'assets/image/ic_right.svg',
+              height: 28,
+              width: 28,
+            ),
+            lookUp: 'Look up',
+            smile: 'Please Smile',
+            iconSmile: SvgPicture.asset(
+              'assets/image/ic_smile.svg',
+              height: 28,
+              width: 28,
+            ),
           ),
         );
       case 4: // Skip some steps
@@ -200,12 +221,22 @@ class _HomeViewState extends State<HomeView> {
           isDarkMode: false,
           showCurrentStep: true,
           customizedLabel: LivenessDetectionLabelModel(
-            blink: 'Blink Eyes',
+            blink: 'Please blink your eyes',
+            iconBlink: SvgPicture.asset(
+              'assets/image/ic_blink.svg',
+              height: 28,
+              width: 28,
+            ),
             lookDown: '', // Skip
             lookLeft: '', // Skip
             lookRight: '', // Skip
-            lookUp: 'Look Up Please',
-            smile: 'Smile Wide',
+            lookUp: 'Look up',
+            smile: 'Please Smile',
+            iconSmile: SvgPicture.asset(
+              'assets/image/ic_smile.svg',
+              height: 28,
+              width: 28,
+            ),
           ),
         );
       case 5: // Low quality + Timer + Cooldown
@@ -257,12 +288,32 @@ class _HomeViewState extends State<HomeView> {
           isDarkMode: true,
           showCurrentStep: true,
           customizedLabel: LivenessDetectionLabelModel(
-            blink: '👁️ Kedipkan Mata',
-            lookDown: '⬇️ Lihat Bawah',
-            lookLeft: '⬅️ Lihat Kiri',
-            lookRight: '➡️ Lihat Kanan',
-            lookUp: '⬆️ Lihat Atas',
-            smile: '😊 Senyum Manis',
+            blink: 'Please blink your eyes',
+            iconBlink: SvgPicture.asset(
+              'assets/image/ic_blink.svg',
+              height: 28,
+              width: 28,
+            ),
+            lookDown: 'Look down',
+            lookLeft: 'Turn your head to the left',
+            iconLookLeft: SvgPicture.asset(
+              'assets/image/ic_left.svg',
+              height: 28,
+              width: 28,
+            ),
+            lookRight: 'Turn your head to the right',
+            iconLookRight: SvgPicture.asset(
+              'assets/image/ic_right.svg',
+              height: 28,
+              width: 28,
+            ),
+            lookUp: 'Look up',
+            smile: 'Please Smile',
+            iconSmile: SvgPicture.asset(
+              'assets/image/ic_smile.svg',
+              height: 28,
+              width: 28,
+            ),
           ),
         );
       default:

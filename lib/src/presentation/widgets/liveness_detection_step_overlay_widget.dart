@@ -3,6 +3,15 @@ import 'package:flutter_liveness_detection_randomized_plugin/index.dart';
 import 'package:flutter_liveness_detection_randomized_plugin/src/presentation/widgets/circular_progress_widget/circular_progress_widget.dart';
 import 'package:lottie/lottie.dart';
 
+const List<String> _defaultTips = [
+  'Position your face in the oval',
+  'Look directly at the camera',
+  'Ensure good lighting on your face',
+  'Remove your glasses or mask',
+];
+
+const String _defaultTipsTitle = 'Tips for the best result';
+
 class LivenessDetectionStepOverlayWidget extends StatefulWidget {
   final List<LivenessDetectionStepItem> steps;
   final VoidCallback onCompleted;
@@ -13,6 +22,10 @@ class LivenessDetectionStepOverlayWidget extends StatefulWidget {
   final bool isDarkMode;
   final bool showDurationUiText;
   final int? duration;
+  final bool showTips;
+  final List<String>? tips;
+  final String? tipsTitle;
+  final String? title;
 
   const LivenessDetectionStepOverlayWidget({
     super.key,
@@ -25,6 +38,10 @@ class LivenessDetectionStepOverlayWidget extends StatefulWidget {
     this.isDarkMode = true,
     this.showDurationUiText = false,
     this.duration,
+    this.showTips = true,
+    this.tips,
+    this.tipsTitle,
+    this.title,
   });
 
   @override
@@ -112,9 +129,7 @@ class LivenessDetectionStepOverlayWidgetState
       maxStep: _indicatorMaxStep,
       child: Transform.scale(
         scale: scale,
-        child: Center(
-          child: widget.camera,
-        ),
+        child: Center(child: widget.camera),
       ),
     );
   }
@@ -186,57 +201,70 @@ class LivenessDetectionStepOverlayWidgetState
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      minimum: const EdgeInsets.all(16),
+      minimum: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
       child: Container(
-        margin: const EdgeInsets.all(12),
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         height: double.infinity,
         width: double.infinity,
         color: Colors.transparent,
-        child: Stack(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: widget.showCurrentStep
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Back',
-                          style: TextStyle(
-                              color: widget.isDarkMode
-                                  ? Colors.white
-                                  : Colors.black),
-                        ),
-                        Visibility(
-                          replacement: const SizedBox.shrink(),
-                          visible: widget.showDurationUiText,
-                          child: Text(
-                            _getRemainingTimeText(_remainingDuration),
-                            style: TextStyle(
-                              color: widget.isDarkMode
-                                  ? Colors.white
-                                  : Colors.black,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          stepCounter,
-                          style: TextStyle(
-                              color: widget.isDarkMode
-                                  ? Colors.white
-                                  : Colors.black),
-                        )
-                      ],
-                    )
-                  : Text('Back',
-                      style: TextStyle(
-                          color:
-                              widget.isDarkMode ? Colors.white : Colors.black)),
-            ),
-            _buildBody(),
+            _buildTitleBar(),
+            Expanded(child: _buildBody()),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTitleBar() {
+    final title = widget.title ?? 'Face Verification';
+    final textColor =
+        widget.isDarkMode ? Colors.white : Colors.black;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Icon(CupertinoIcons.back, color: textColor, size: 28),
+          ),
+          Expanded(
+            child: Text(
+              title,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: textColor,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          widget.showCurrentStep
+              ? Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (widget.showDurationUiText) ...[
+                      Text(
+                        _getRemainingTimeText(_remainingDuration),
+                        style: TextStyle(
+                          color: textColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    Text(
+                      stepCounter,
+                      style: TextStyle(color: textColor),
+                    ),
+                  ],
+                )
+              : SizedBox(width: 28),
+        ],
       ),
     );
   }
@@ -248,15 +276,13 @@ class LivenessDetectionStepOverlayWidgetState
       mainAxisSize: MainAxisSize.max,
       children: [
         _buildCircularCamera(),
-        const SizedBox(height: 16),
         _buildFaceDetectionStatus(),
-        const SizedBox(height: 16),
         Visibility(
           visible: _pageViewVisible,
           replacement: const CircularProgressIndicator.adaptive(),
           child: _buildStepPageView(),
         ),
-        const SizedBox(height: 16),
+        if (widget.showTips) _buildTipsSection(),
         widget.isDarkMode ? _buildLoaderDarkMode() : _buildLoaderLightMode(),
       ],
     );
@@ -280,35 +306,36 @@ class LivenessDetectionStepOverlayWidgetState
   }
 
   Widget _buildFaceDetectionStatus() {
+    if (widget.isFaceDetected) return const SizedBox.shrink();
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         SizedBox(
           child: widget.isDarkMode
               ? LottieBuilder.asset(
-                  widget.isFaceDetected
-                      ? 'packages/flutter_liveness_detection_randomized_plugin/src/core/assets/face-detected.json'
-                      : 'packages/flutter_liveness_detection_randomized_plugin/src/core/assets/face-id-anim.json',
-                  height: widget.isFaceDetected ? 32 : 22,
-                  width: widget.isFaceDetected ? 32 : 22,
+                  'packages/flutter_liveness_detection_randomized_plugin/src/core/assets/face-id-anim.json',
+                  height: 22,
+                  width: 22,
                 )
               : ColorFiltered(
                   colorFilter: ColorFilter.mode(
-                      widget.isFaceDetected ? Colors.green : Colors.black,
-                      BlendMode.modulate),
+                    Colors.black,
+                    BlendMode.modulate,
+                  ),
                   child: LottieBuilder.asset(
-                    widget.isFaceDetected
-                        ? 'packages/flutter_liveness_detection_randomized_plugin/src/core/assets/face-detected.json'
-                        : 'packages/flutter_liveness_detection_randomized_plugin/src/core/assets/face-id-anim.json',
-                    height: widget.isFaceDetected ? 32 : 22,
-                    width: widget.isFaceDetected ? 32 : 22,
-                  )),
+                    'packages/flutter_liveness_detection_randomized_plugin/src/core/assets/face-id-anim.json',
+                    height: 22,
+                    width: 22,
+                  ),
+                ),
         ),
         const SizedBox(width: 16),
         Text(
-          widget.isFaceDetected ? 'User Face Found' : 'User Face Not Found...',
-          style:
-              TextStyle(color: widget.isDarkMode ? Colors.white : Colors.black),
+          'User Face Not Found...',
+          style: TextStyle(
+            color: widget.isDarkMode ? Colors.white : Colors.black,
+          ),
         ),
       ],
     );
@@ -329,25 +356,102 @@ class LivenessDetectionStepOverlayWidgetState
     );
   }
 
-  Widget _buildStepItem(BuildContext context, int index) {
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: Container(
+  Widget _buildTipsSection() {
+    final tipsList = widget.tips ?? _defaultTips;
+    final title = widget.tipsTitle ?? _defaultTipsTitle;
+    if (tipsList.isEmpty) return const SizedBox.shrink();
+
+    final tipColor = Colors.black;
+    final accentColor = Colors.deepOrange.shade700;
+
+    return Container(
+        width: double.infinity,
         decoration: BoxDecoration(
-          color: widget.isDarkMode ? Colors.black : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        alignment: Alignment.center,
-        margin: const EdgeInsets.symmetric(horizontal: 30),
-        padding: const EdgeInsets.all(10),
-        child: Text(
-          widget.steps[index].title,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: widget.isDarkMode ? Colors.white : Colors.black,
-            fontSize: 24,
-            fontWeight: FontWeight.w500,
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Color(0xFFDDAF59),
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          ...tipsList.map(
+            (tip) => Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '• ',
+                    style: TextStyle(
+                      color: accentColor,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Expanded(
+                    child: Text(
+                      tip,
+                      style: TextStyle(color: tipColor, fontSize: 14),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStepItem(BuildContext context, int index) {
+    final step = widget.steps[index];
+    final textColor = widget.isDarkMode ? Colors.white : Colors.black;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10, 2, 10, 10),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 30),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (step.icon != null) ...[
+              SizedBox(
+                height: 28,
+                width: 28,
+                child: step.icon,
+              ),
+              const SizedBox(width: 12),
+            ],
+            Flexible(
+              child: Text(
+                step.title,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
