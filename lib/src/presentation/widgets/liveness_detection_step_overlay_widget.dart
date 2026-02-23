@@ -362,7 +362,6 @@ class LivenessDetectionStepOverlayWidgetState
     if (tipsList.isEmpty) return const SizedBox.shrink();
 
     final tipColor = Colors.black;
-    final accentColor = Colors.deepOrange.shade700;
 
     return Container(
         width: double.infinity,
@@ -395,14 +394,21 @@ class LivenessDetectionStepOverlayWidgetState
             (tip) => Padding(
               padding: const EdgeInsets.only(bottom: 4),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    '• ',
-                    style: TextStyle(
-                      color: accentColor,
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
+                  SizedBox(
+                    height: 20,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        '• ',
+                        style: TextStyle(
+                          color: tipColor,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          height: 1.0,
+                        ),
+                      ),
                     ),
                   ),
                   Expanded(
