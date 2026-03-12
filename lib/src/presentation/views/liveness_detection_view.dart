@@ -1,5 +1,4 @@
 // ignore_for_file: depend_on_referenced_packages
-import 'package:flutter/material.dart';
 import 'package:flutter_liveness_detection_randomized_plugin/index.dart';
 import 'package:flutter_liveness_detection_randomized_plugin/src/core/constants/liveness_detection_step_constant.dart';
 import 'package:collection/collection.dart';
@@ -201,7 +200,7 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
     _preInitCallBack();
     super.initState();
     if (widget.config.enableCooldownOnFailure) {
-      LivenessCooldownService.instance.configure(
+      LivenessCooldownService.instance.configureAndNormalize(
         maxFailedAttempts: widget.config.maxFailedAttempts,
         cooldownMinutes: widget.config.cooldownMinutes,
       );

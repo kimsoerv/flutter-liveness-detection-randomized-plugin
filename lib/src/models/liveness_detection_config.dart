@@ -23,6 +23,7 @@ class LivenessDetectionConfig {
   final String? tipsTitle;
   final String? title;
   final Color? backgroundColor;
+  final List<Widget>? icons;
 
   LivenessDetectionConfig({
     this.startWithInfoScreen = false,
@@ -35,7 +36,7 @@ class LivenessDetectionConfig {
     this.cameraResolution = ResolutionPreset.high,
     this.enableCooldownOnFailure = true,
     this.maxFailedAttempts = 3,
-    this.cooldownMinutes = 10,
+    this.cooldownMinutes = 5,
     this.isEnableSnackBar = true,
     this.shuffleListWithSmileLast = true,
     this.showCurrentStep = false,
@@ -45,6 +46,7 @@ class LivenessDetectionConfig {
     this.tipsTitle,
     this.title,
     this.backgroundColor,
+    this.icons,
   }) : assert(
          !useCustomizedLabel || customizedLabel != null,
          'customizedLabel must not be null when useCustomizedLabel is true',

@@ -6,7 +6,7 @@ import 'package:flutter_liveness_detection_randomized_plugin/src/models/liveness
 class LivenessCooldownService {
   static const String _cooldownKey = 'liveness_detection_cooldown';
   int _maxFailedAttempts = 3;
-  int _cooldownMinutes = 10;
+  int _cooldownMinutes = 5;
 
   static LivenessCooldownService? _instance;
   static LivenessCooldownService get instance {
@@ -19,6 +19,37 @@ class LivenessCooldownService {
   void configure({required int maxFailedAttempts, required int cooldownMinutes}) {
     _maxFailedAttempts = maxFailedAttempts;
     _cooldownMinutes = cooldownMinutes;
+  }
+
+  /// Configures the service and normalizes any persisted cooldown to the
+  /// configured duration. This prevents older app versions (e.g. 10 minutes)
+  /// from keeping users blocked longer than the current config (e.g. 5 minutes).
+  Future<void> configureAndNormalize({
+    required int maxFailedAttempts,
+    required int cooldownMinutes,
+  }) async {
+    configure(maxFailedAttempts: maxFailedAttempts, cooldownMinutes: cooldownMinutes);
+    await capActiveCooldownToConfiguredDuration();
+  }
+
+  /// If an older, longer cooldown is already persisted, cap it to the currently
+  /// configured duration (e.g. change 10 minutes -> 5 minutes).
+  Future<LivenessDetectionCooldown> capActiveCooldownToConfiguredDuration() async {
+    final state = await getCooldownState();
+    if (!state.isInCooldown) return state;
+
+    final max = Duration(minutes: _cooldownMinutes);
+    final remaining = state.remainingCooldownTime;
+    if (remaining <= max) return state;
+
+    final capped = state.copyWith(
+      cooldownEndTime: DateTime.now().add(max),
+      isInCooldown: true,
+    );
+    await _saveCooldownState(capped);
+    _cooldownController.add(capped);
+    _startCooldownTimer(capped);
+    return capped;
   }
 
   Timer? _cooldownTimer;
@@ -87,6 +118,12 @@ class LivenessCooldownService {
   }
 
   Future<LivenessDetectionCooldown> recordSuccessfulAttempt() async {
+    return await _resetCooldown();
+  }
+
+  /// Clears failed-attempts and any active cooldown.
+  /// Useful if you want to reset state between test runs.
+  Future<LivenessDetectionCooldown> reset() async {
     return await _resetCooldown();
   }
 

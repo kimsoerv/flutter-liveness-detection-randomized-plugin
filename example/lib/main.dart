@@ -69,7 +69,7 @@ class _HomeViewState extends State<HomeView> {
                 final config = _getTestConfig();
                 final String? response =
                     await FlutterLivenessDetectionRandomizedPlugin.instance
-                        .livenessDetection(context: context, config: config);
+                        .livenessDetection(context: context, config: config, isBottomSheetUI: false);
                 if (mounted) {
                   setState(() {
                     imgPath = response;

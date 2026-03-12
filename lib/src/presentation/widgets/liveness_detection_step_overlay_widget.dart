@@ -243,27 +243,28 @@ class LivenessDetectionStepOverlayWidgetState
               ),
             ),
           ),
-          widget.showCurrentStep
-              ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (widget.showDurationUiText) ...[
-                      Text(
-                        _getRemainingTimeText(_remainingDuration),
-                        style: TextStyle(
-                          color: textColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    Text(
-                      stepCounter,
-                      style: TextStyle(color: textColor),
-                    ),
-                  ],
-                )
-              : SizedBox(width: 28),
+          const SizedBox(width: 28),
+          // widget.showCurrentStep
+          //     ? Row(
+          //         mainAxisSize: MainAxisSize.min,
+          //         children: [
+          //           if (widget.showDurationUiText) ...[
+          //             Text(
+          //               _getRemainingTimeText(_remainingDuration),
+          //               style: TextStyle(
+          //                 color: textColor,
+          //                 fontWeight: FontWeight.bold,
+          //               ),
+          //             ),
+          //             const SizedBox(width: 8),
+          //           ],
+          //           Text(
+          //             stepCounter,
+          //             style: TextStyle(color: textColor),
+          //           ),
+          //         ],
+          //       )
+          //     : SizedBox(width: 28),
         ],
       ),
     );

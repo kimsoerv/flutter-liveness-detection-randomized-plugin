@@ -52,13 +52,13 @@ class _LivenessCooldownWidgetState extends State<LivenessCooldownWidget> with Wi
   Future<void> _loadRemainingTime() async {
     final prefs = await SharedPreferences.getInstance();
     final savedSeconds = prefs.getInt(_remainingTimeKey);
-    
+
     if (savedSeconds != null) {
       _remainingTime = Duration(seconds: savedSeconds);
     } else {
       _remainingTime = widget.cooldownState.remainingCooldownTime;
     }
-    
+
     if (mounted) {
       setState(() {});
       _startCountdown();
@@ -81,7 +81,7 @@ class _LivenessCooldownWidgetState extends State<LivenessCooldownWidget> with Wi
 
   void _startCountdown() {
     _countdownTimer?.cancel();
-    
+
     if (_remainingTime.inSeconds <= 0) {
       _clearSavedTime();
       widget.onCooldownComplete?.call();
@@ -97,7 +97,7 @@ class _LivenessCooldownWidgetState extends State<LivenessCooldownWidget> with Wi
       setState(() {
         _remainingTime = _remainingTime - const Duration(seconds: 1);
       });
-      
+
       _saveRemainingTime();
 
       if (_remainingTime.inSeconds <= 0) {
