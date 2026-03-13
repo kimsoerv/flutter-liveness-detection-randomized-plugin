@@ -101,6 +101,7 @@ class LivenessCooldownService {
         failedAttempts: newFailedAttempts,
         cooldownEndTime: cooldownEndTime,
         isInCooldown: true,
+        isBlocked: false,
       );
 
       _startCooldownTimer(newState);
@@ -109,6 +110,7 @@ class LivenessCooldownService {
         failedAttempts: newFailedAttempts,
         cooldownEndTime: null,
         isInCooldown: false,
+        isBlocked: false,
       );
     }
 

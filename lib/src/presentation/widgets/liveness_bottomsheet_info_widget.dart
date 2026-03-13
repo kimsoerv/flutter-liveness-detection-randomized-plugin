@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 enum LivenessBottomSheetInfoType { manyAttempts, locked, faceMismatch }
 
 class _RetryCountdownText extends StatefulWidget {
-  const _RetryCountdownText({required this.initialRemaining});
+  const _RetryCountdownText({required this.initialRemaining, this.onResult});
 
   final Duration initialRemaining;
+  final Function(bool isCountZero)? onResult;
 
   @override
   State<_RetryCountdownText> createState() => _RetryCountdownTextState();
@@ -27,6 +28,11 @@ class _RetryCountdownTextState extends State<_RetryCountdownText> {
         setState(() {
           final next = _remaining - const Duration(seconds: 1);
           _remaining = next.isNegative ? Duration.zero : next;
+          if (_remaining.inSeconds <= 0) {
+            widget.onResult!(true);
+          } else {
+            widget.onResult!(false);
+          }
         });
         if (_remaining.inSeconds <= 0) t.cancel();
       });
@@ -59,7 +65,7 @@ class _RetryCountdownTextState extends State<_RetryCountdownText> {
   }
 }
 
-class LivenessBottomSheetInfoWidget extends StatelessWidget {
+class LivenessBottomSheetInfoWidget extends StatefulWidget {
   const LivenessBottomSheetInfoWidget({
     super.key,
     required this.title,
@@ -67,10 +73,10 @@ class LivenessBottomSheetInfoWidget extends StatelessWidget {
     this.icon,
     this.badgeText,
     this.countdownDuration,
-    this.isPrimaryActionEnabled = true,
     this.primaryActionText,
     this.onPrimaryAction,
     this.colorByType,
+    this.isEnableActionTryAgain,
   });
 
   final Widget? icon;
@@ -79,9 +85,9 @@ class LivenessBottomSheetInfoWidget extends StatelessWidget {
   final String? badgeText;
   final Duration? countdownDuration;
   final Color? colorByType;
-  final bool isPrimaryActionEnabled;
   final String? primaryActionText;
   final VoidCallback? onPrimaryAction;
+  final bool? isEnableActionTryAgain;
 
   factory LivenessBottomSheetInfoWidget.forType({
     Key? key,
@@ -105,10 +111,10 @@ class LivenessBottomSheetInfoWidget extends StatelessWidget {
           icon: icon,
           primaryActionText: "Try Again",
           onPrimaryAction: onTryAgain,
+          isEnableActionTryAgain: true,
         );
       case LivenessBottomSheetInfoType.locked:
         final wait = formattedWaitTime ?? "5:00";
-        final isEnabled = (countdownDuration?.inSeconds ?? 0) <= 0;
         return LivenessBottomSheetInfoWidget(
           key: key,
           title: "Temporarily locked",
@@ -116,10 +122,10 @@ class LivenessBottomSheetInfoWidget extends StatelessWidget {
               "For your protection, we’ve temporarily locked this feature after multiple unsuccessful attempts. Please wait $wait before trying again.",
           countdownDuration: countdownDuration ?? Duration.zero,
           colorByType: const Color(0xFFE60013).withOpacity(0.10),
-          isPrimaryActionEnabled: isEnabled,
           icon: icon,
           primaryActionText: "Try Again",
           onPrimaryAction: onTryAgain,
+          isEnableActionTryAgain: false,
         );
       case LivenessBottomSheetInfoType.faceMismatch:
         return LivenessBottomSheetInfoWidget(
@@ -130,8 +136,25 @@ class LivenessBottomSheetInfoWidget extends StatelessWidget {
           icon: icon,
           primaryActionText: "Try Again",
           onPrimaryAction: onTryAgain,
+          isEnableActionTryAgain: true,
         );
     }
+  }
+
+  @override
+  State<LivenessBottomSheetInfoWidget> createState() => _LivenessBottomSheetInfoWidgetState();
+}
+
+class _LivenessBottomSheetInfoWidgetState extends State<LivenessBottomSheetInfoWidget> {
+  bool isEnableAction = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    setState(() {
+      isEnableAction = widget.isEnableActionTryAgain ?? false;
+    });
   }
 
   @override
@@ -147,7 +170,7 @@ class LivenessBottomSheetInfoWidget extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -167,11 +190,11 @@ class LivenessBottomSheetInfoWidget extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: icon,
+                child: widget.icon,
               ),
               const SizedBox(height: 16),
               Text(
-                message,
+                widget.message,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: Colors.black,
@@ -180,7 +203,7 @@ class LivenessBottomSheetInfoWidget extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              if (badgeText != null && badgeText!.trim().isNotEmpty) ...[
+              if (widget.badgeText != null && widget.badgeText!.trim().isNotEmpty) ...[
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -189,21 +212,21 @@ class LivenessBottomSheetInfoWidget extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color:
-                        colorByType?.withOpacity(0.1) ??
+                        widget.colorByType?.withOpacity(0.1) ??
                         const Color(0xFFDDAF59),
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    badgeText!,
+                    widget.badgeText!,
                     style: TextStyle(
-                      color: colorByType,
+                      color: widget.colorByType,
                       fontWeight: FontWeight.w500,
                       fontSize: 12.5,
                     ),
                   ),
                 ),
               ],
-              if (countdownDuration != null) ...[
+              if (widget.countdownDuration != null) ...[
                 const SizedBox(height: 10),
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -212,12 +235,17 @@ class LivenessBottomSheetInfoWidget extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color:
-                        colorByType?.withOpacity(0.1) ??
+                        widget.colorByType?.withOpacity(0.1) ??
                         const Color(0xFF00131A).withOpacity(0.10),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: _RetryCountdownText(
-                    initialRemaining: countdownDuration!,
+                    initialRemaining: widget.countdownDuration!,
+                    onResult: (isCountZero) {
+                     setState(() {
+                       isEnableAction = isCountZero;
+                     });
+                    },
                   ),
                 ),
               ],
@@ -226,13 +254,13 @@ class LivenessBottomSheetInfoWidget extends StatelessWidget {
                 height: 50,
                 width: double.infinity,
                 child: Opacity(
-                  opacity: isPrimaryActionEnabled ? 1 : 0.2,
+                  opacity: isEnableAction ? 1 : 0.2,
                   child: OutlinedButton(
-                    onPressed: !isPrimaryActionEnabled
+                    onPressed: !isEnableAction
                         ? null
                         : () {
                             Navigator.of(context).maybePop();
-                            onPrimaryAction?.call();
+                            widget.onPrimaryAction?.call();
                           },
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(
@@ -245,7 +273,7 @@ class LivenessBottomSheetInfoWidget extends StatelessWidget {
                       ),
                     ),
                     child: Text(
-                      primaryActionText ?? "OK",
+                      widget.primaryActionText ?? "OK",
                       style: const TextStyle(color: Color(0xFFE60013)),
                     ),
                   ),

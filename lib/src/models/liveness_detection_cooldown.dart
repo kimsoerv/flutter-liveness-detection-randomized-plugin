@@ -2,22 +2,26 @@ class LivenessDetectionCooldown {
   final int failedAttempts;
   final DateTime? cooldownEndTime;
   final bool isInCooldown;
+  final bool isBlocked;
 
   const LivenessDetectionCooldown({
     this.failedAttempts = 0,
     this.cooldownEndTime,
     this.isInCooldown = false,
+    this.isBlocked = false,
   });
 
   LivenessDetectionCooldown copyWith({
     int? failedAttempts,
     DateTime? cooldownEndTime,
     bool? isInCooldown,
+    bool? isBlocked,
   }) {
     return LivenessDetectionCooldown(
       failedAttempts: failedAttempts ?? this.failedAttempts,
       cooldownEndTime: cooldownEndTime ?? this.cooldownEndTime,
       isInCooldown: isInCooldown ?? this.isInCooldown,
+      isBlocked: isBlocked ?? this.isBlocked,
     );
   }
 
@@ -34,6 +38,7 @@ class LivenessDetectionCooldown {
       'failedAttempts': failedAttempts,
       'cooldownEndTime': cooldownEndTime?.millisecondsSinceEpoch,
       'isInCooldown': isInCooldown,
+      'isBlocked': isBlocked,
     };
   }
 
@@ -44,6 +49,7 @@ class LivenessDetectionCooldown {
           ? DateTime.fromMillisecondsSinceEpoch(json['cooldownEndTime'])
           : null,
       isInCooldown: json['isInCooldown'] ?? false,
+      isBlocked: json['isBlocked'] ?? false,
     );
   }
 }

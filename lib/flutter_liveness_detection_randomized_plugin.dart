@@ -26,6 +26,7 @@ class FlutterLivenessDetectionRandomizedPlugin {
     required BuildContext context,
     required LivenessDetectionConfig config,
     required bool isBottomSheetUI,
+    final VoidCallback? onTryAgain,
   }) async {
     if (config.enableCooldownOnFailure) {
       await LivenessCooldownService.instance.configureAndNormalize(
@@ -34,7 +35,6 @@ class FlutterLivenessDetectionRandomizedPlugin {
       );
       final cooldownState = await LivenessCooldownService.instance.getCooldownState();
       if (cooldownState.isInCooldown && context.mounted) {
-
         if (isBottomSheetUI) {
           final wait = _formatMinutesSeconds(
             cooldownState.remainingCooldownTime,
@@ -51,6 +51,7 @@ class FlutterLivenessDetectionRandomizedPlugin {
                 formattedWaitTime: wait,
                 countdownDuration: cooldownState.remainingCooldownTime,
                 icon: config.icons?[2],
+                onTryAgain: onTryAgain,
               );
             },
           );
@@ -73,12 +74,10 @@ class FlutterLivenessDetectionRandomizedPlugin {
     }
 
     if (!context.mounted) return null;
-    
+
     final String? capturedFacePath = await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => LivenessDetectionView(
-          config: config,
-        ),
+        builder: (context) => LivenessDetectionView(config: config),
       ),
     );
 
@@ -86,8 +85,7 @@ class FlutterLivenessDetectionRandomizedPlugin {
       if (capturedFacePath != null) {
         await LivenessCooldownService.instance.recordSuccessfulAttempt();
       } else {
-        final updatedState =
-            await LivenessCooldownService.instance.recordFailedAttempt();
+        final updatedState = await LivenessCooldownService.instance.recordFailedAttempt();
 
         if (context.mounted && isBottomSheetUI) {
           if (updatedState.isInCooldown) {
@@ -105,13 +103,16 @@ class FlutterLivenessDetectionRandomizedPlugin {
                   formattedWaitTime: wait,
                   countdownDuration: updatedState.remainingCooldownTime,
                   icon: config.icons?[2],
+                  onTryAgain: onTryAgain,
                 );
               },
             );
           } else {
             final maxAttempts = config.maxFailedAttempts;
-            final attemptsUsed =
-                updatedState.failedAttempts.clamp(0, maxAttempts);
+            final attemptsUsed = updatedState.failedAttempts.clamp(
+              0,
+              maxAttempts,
+            );
             showModalBottomSheet(
               context: context,
               isScrollControlled: true,
@@ -122,6 +123,7 @@ class FlutterLivenessDetectionRandomizedPlugin {
                   isDarkMode: config.isDarkMode,
                   attemptsLeftText: 'Attempts: $attemptsUsed/$maxAttempts',
                   icon: config.icons?[1],
+                  onTryAgain: onTryAgain,
                 );
               },
             );
@@ -140,6 +142,7 @@ class FlutterLivenessDetectionRandomizedPlugin {
               type: LivenessBottomSheetInfoType.manyAttempts,
               isDarkMode: config.isDarkMode,
               icon: config.icons?[1],
+              onTryAgain: onTryAgain,
             );
           },
         );
