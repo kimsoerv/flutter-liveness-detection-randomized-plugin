@@ -203,6 +203,7 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
       LivenessCooldownService.instance.configureAndNormalize(
         maxFailedAttempts: widget.config.maxFailedAttempts,
         cooldownMinutes: widget.config.cooldownMinutes,
+        maxCooldownRounds: widget.config.maxCooldownRounds,
       );
       LivenessCooldownService.instance.initializeCooldownTimer();
     }

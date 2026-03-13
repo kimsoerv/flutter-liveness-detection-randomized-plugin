@@ -1,11 +1,13 @@
 class LivenessDetectionCooldown {
   final int failedAttempts;
+  final int cooldownRounds;
   final DateTime? cooldownEndTime;
   final bool isInCooldown;
   final bool isBlocked;
 
   const LivenessDetectionCooldown({
     this.failedAttempts = 0,
+    this.cooldownRounds = 0,
     this.cooldownEndTime,
     this.isInCooldown = false,
     this.isBlocked = false,
@@ -13,12 +15,14 @@ class LivenessDetectionCooldown {
 
   LivenessDetectionCooldown copyWith({
     int? failedAttempts,
+    int? cooldownRounds,
     DateTime? cooldownEndTime,
     bool? isInCooldown,
     bool? isBlocked,
   }) {
     return LivenessDetectionCooldown(
       failedAttempts: failedAttempts ?? this.failedAttempts,
+      cooldownRounds: cooldownRounds ?? this.cooldownRounds,
       cooldownEndTime: cooldownEndTime ?? this.cooldownEndTime,
       isInCooldown: isInCooldown ?? this.isInCooldown,
       isBlocked: isBlocked ?? this.isBlocked,
@@ -36,6 +40,7 @@ class LivenessDetectionCooldown {
   Map<String, dynamic> toJson() {
     return {
       'failedAttempts': failedAttempts,
+      'cooldownRounds': cooldownRounds,
       'cooldownEndTime': cooldownEndTime?.millisecondsSinceEpoch,
       'isInCooldown': isInCooldown,
       'isBlocked': isBlocked,
@@ -45,6 +50,7 @@ class LivenessDetectionCooldown {
   factory LivenessDetectionCooldown.fromJson(Map<String, dynamic> json) {
     return LivenessDetectionCooldown(
       failedAttempts: json['failedAttempts'] ?? 0,
+      cooldownRounds: json['cooldownRounds'] ?? 0,
       cooldownEndTime: json['cooldownEndTime'] != null
           ? DateTime.fromMillisecondsSinceEpoch(json['cooldownEndTime'])
           : null,

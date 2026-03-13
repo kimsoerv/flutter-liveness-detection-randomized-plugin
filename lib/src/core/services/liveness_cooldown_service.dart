@@ -7,6 +7,7 @@ class LivenessCooldownService {
   static const String _cooldownKey = 'liveness_detection_cooldown';
   int _maxFailedAttempts = 3;
   int _cooldownMinutes = 5;
+  int _maxCooldownRounds = 2;
 
   static LivenessCooldownService? _instance;
   static LivenessCooldownService get instance {
@@ -16,9 +17,14 @@ class LivenessCooldownService {
 
   LivenessCooldownService._();
 
-  void configure({required int maxFailedAttempts, required int cooldownMinutes}) {
+  void configure({
+    required int maxFailedAttempts,
+    required int cooldownMinutes,
+    required int maxCooldownRounds,
+  }) {
     _maxFailedAttempts = maxFailedAttempts;
     _cooldownMinutes = cooldownMinutes;
+    _maxCooldownRounds = maxCooldownRounds;
   }
 
   /// Configures the service and normalizes any persisted cooldown to the
@@ -27,8 +33,13 @@ class LivenessCooldownService {
   Future<void> configureAndNormalize({
     required int maxFailedAttempts,
     required int cooldownMinutes,
+    required int maxCooldownRounds,
   }) async {
-    configure(maxFailedAttempts: maxFailedAttempts, cooldownMinutes: cooldownMinutes);
+    configure(
+      maxFailedAttempts: maxFailedAttempts,
+      cooldownMinutes: cooldownMinutes,
+      maxCooldownRounds: maxCooldownRounds,
+    );
     await capActiveCooldownToConfiguredDuration();
   }
 
@@ -74,7 +85,7 @@ class LivenessCooldownService {
     // Check if cooldown has expired
     if (cooldown.isInCooldown &&
         cooldown.remainingCooldownTime.inSeconds <= 0) {
-      return await _resetCooldown();
+      return await _resetCooldown(clearRounds: false, clearBlocked: false);
     }
 
     return cooldown;
@@ -83,7 +94,7 @@ class LivenessCooldownService {
   Future<LivenessDetectionCooldown> recordFailedAttempt() async {
     final currentState = await getCooldownState();
 
-    if (currentState.isInCooldown) {
+    if (currentState.isInCooldown || currentState.isBlocked) {
       return currentState;
     }
 
@@ -92,6 +103,7 @@ class LivenessCooldownService {
     LivenessDetectionCooldown newState;
 
     if (newFailedAttempts >= _maxFailedAttempts) {
+      final nextRounds = currentState.cooldownRounds + 1;
       // Start cooldown
       final cooldownEndTime = DateTime.now().add(
         Duration(minutes: _cooldownMinutes),
@@ -99,15 +111,17 @@ class LivenessCooldownService {
 
       newState = LivenessDetectionCooldown(
         failedAttempts: newFailedAttempts,
+        cooldownRounds: nextRounds,
         cooldownEndTime: cooldownEndTime,
         isInCooldown: true,
-        isBlocked: false,
+        isBlocked: nextRounds >= _maxCooldownRounds,
       );
 
       _startCooldownTimer(newState);
     } else {
       newState = LivenessDetectionCooldown(
         failedAttempts: newFailedAttempts,
+        cooldownRounds: currentState.cooldownRounds,
         cooldownEndTime: null,
         isInCooldown: false,
         isBlocked: false,
@@ -120,17 +134,27 @@ class LivenessCooldownService {
   }
 
   Future<LivenessDetectionCooldown> recordSuccessfulAttempt() async {
-    return await _resetCooldown();
+    return await _resetCooldown(clearRounds: true, clearBlocked: true);
   }
 
   /// Clears failed-attempts and any active cooldown.
   /// Useful if you want to reset state between test runs.
   Future<LivenessDetectionCooldown> reset() async {
-    return await _resetCooldown();
+    return await _resetCooldown(clearRounds: true, clearBlocked: true);
   }
 
-  Future<LivenessDetectionCooldown> _resetCooldown() async {
-    const newState = LivenessDetectionCooldown();
+  Future<LivenessDetectionCooldown> _resetCooldown({
+    required bool clearRounds,
+    required bool clearBlocked,
+  }) async {
+    final currentState = await _loadCooldownState();
+    final newState = LivenessDetectionCooldown(
+      failedAttempts: 0,
+      cooldownRounds: clearRounds ? 0 : currentState.cooldownRounds,
+      cooldownEndTime: null,
+      isInCooldown: false,
+      isBlocked: clearBlocked ? false : currentState.isBlocked,
+    );
     await _saveCooldownState(newState);
     _cooldownController.add(newState);
     _cooldownTimer?.cancel();
@@ -149,7 +173,7 @@ class LivenessCooldownService {
     if (remaining.inSeconds <= 0) return;
 
     _cooldownTimer = Timer(remaining, () async {
-      await _resetCooldown();
+      await _resetCooldown(clearRounds: false, clearBlocked: false);
     });
   }
 
@@ -164,5 +188,14 @@ class LivenessCooldownService {
   void dispose() {
     _cooldownTimer?.cancel();
     _cooldownController.close();
+  }
+
+  Future<LivenessDetectionCooldown> _loadCooldownState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final cooldownJson = prefs.getString(_cooldownKey);
+    if (cooldownJson == null) {
+      return const LivenessDetectionCooldown();
+    }
+    return LivenessDetectionCooldown.fromJson(jsonDecode(cooldownJson));
   }
 }

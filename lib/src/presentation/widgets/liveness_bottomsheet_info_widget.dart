@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-enum LivenessBottomSheetInfoType { manyAttempts, locked, faceMismatch }
+enum LivenessBottomSheetInfoType { manyAttempts, blocked, faceMismatch }
 
 class _RetryCountdownText extends StatefulWidget {
   const _RetryCountdownText({required this.initialRemaining, this.onResult});
@@ -22,21 +22,27 @@ class _RetryCountdownTextState extends State<_RetryCountdownText> {
   void initState() {
     super.initState();
     _remaining = widget.initialRemaining;
-    if (_remaining.inSeconds > 0) {
-      _timer = Timer.periodic(const Duration(seconds: 1), (t) {
-        if (!mounted) return;
-        setState(() {
-          final next = _remaining - const Duration(seconds: 1);
-          _remaining = next.isNegative ? Duration.zero : next;
-          if (_remaining.inSeconds <= 0) {
-            widget.onResult!(true);
-          } else {
-            widget.onResult!(false);
-          }
-        });
-        if (_remaining.inSeconds <= 0) t.cancel();
+    if (_remaining.inSeconds <= 0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || widget.onResult == null) return;
+        widget.onResult!(true);
       });
+      return;
     }
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) return;
+      setState(() {
+        final next = _remaining - const Duration(seconds: 1);
+        _remaining = next.isNegative ? Duration.zero : next;
+        if (_remaining.inSeconds <= 0) {
+          widget.onResult!(true);
+        } else {
+          widget.onResult!(false);
+        }
+      });
+      if (_remaining.inSeconds <= 0) t.cancel();
+    });
   }
 
   @override
@@ -113,13 +119,13 @@ class LivenessBottomSheetInfoWidget extends StatefulWidget {
           onPrimaryAction: onTryAgain,
           isEnableActionTryAgain: true,
         );
-      case LivenessBottomSheetInfoType.locked:
+      case LivenessBottomSheetInfoType.blocked:
         final wait = formattedWaitTime ?? "5:00";
         return LivenessBottomSheetInfoWidget(
           key: key,
-          title: "Temporarily locked",
+          title: "Temporarily blocked",
           message:
-              "For your protection, we’ve temporarily locked this feature after multiple unsuccessful attempts. Please wait $wait before trying again.",
+            "For your protection, we’ve temporarily locked this feature after multiple unsuccessful attempts. Please wait $wait before trying again.",
           countdownDuration: countdownDuration ?? Duration.zero,
           colorByType: const Color(0xFFE60013).withOpacity(0.10),
           icon: icon,
