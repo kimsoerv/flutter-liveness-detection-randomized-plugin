@@ -56,52 +56,81 @@ class FlutterLivenessDetectionRandomizedPlugin {
   Future<String?> livenessDetection({
     required BuildContext context,
     required LivenessDetectionConfig config,
-    required bool isBottomSheetUI,
     final VoidCallback? onTryAgain,
   }) async {
+
     if (config.enableCooldownOnFailure) {
       await LivenessCooldownService.instance.configureAndNormalize(
         maxFailedAttempts: config.maxFailedAttempts,
         cooldownMinutes: config.cooldownMinutes,
         maxCooldownRounds: config.maxCooldownRounds,
       );
-      final cooldownState = await LivenessCooldownService.instance.getCooldownState();
-      if ((cooldownState.isInCooldown || cooldownState.isBlocked) &&
-          context.mounted) {
-        if (isBottomSheetUI) {
-          if (cooldownState.isBlocked) {
-            final completer = Completer<String?>();
-            bool didStartCapture = false;
-            await showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              backgroundColor: Colors.transparent,
-              builder: (context) {
-                return LivenessBottomSheetInfoWidget.forType(
-                  type: LivenessBottomSheetInfoType.blocked,
-                  isDarkMode: config.isDarkMode,
-                  countdownDuration: cooldownState.remainingCooldownTime,
-                  icon: config.icons?[2],
-                  onTryAgain: () async {
-                    didStartCapture = true;
-                    await _closeBottomSheet(context);
-                    final result = await _openCaptureOnlyAndHandleResult(
-                      context: context,
-                      config: config,
-                    );
-                    if (!completer.isCompleted) {
-                      completer.complete(result);
-                    }
-                  },
-                );
-              },
-            );
 
-            if (!didStartCapture) {
-              return null;
-            }
-            return await completer.future;
+      final cooldownState = await LivenessCooldownService.instance.getCooldownState();
+      if ((cooldownState.isInCooldown || cooldownState.isBlocked) && context.mounted) {
+        if (cooldownState.isBlocked) {
+          final completer = Completer<String?>();
+          bool didStartCapture = false;
+
+          await showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (context) {
+              return LivenessBottomSheetInfoWidget.forType(
+                type: LivenessBottomSheetInfoType.blocked,
+                isDarkMode: config.isDarkMode,
+                countdownDuration: cooldownState.remainingCooldownTime,
+                icon: config.icons?[2],
+                onTryAgain: () async {
+                  didStartCapture = true;
+                  await _closeBottomSheet(context);
+                  final result = await _openCaptureOnlyAndHandleResult(
+                    context: context,
+                    config: config,
+                  );
+                  if (!completer.isCompleted) {
+                    completer.complete(result);
+                  }
+                },
+              );
+            },
+          );
+
+          if (!didStartCapture) {
+            return null;
           }
+
+          return await completer.future;
+        } else if (cooldownState.isInCooldown) {
+          final wait = _formatMinutesSeconds(cooldownState.remainingCooldownTime);
+          final completer = Completer<String?>();
+
+          await showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (context) {
+              return LivenessBottomSheetInfoWidget.forType(
+                type: LivenessBottomSheetInfoType.locked,
+                isDarkMode: config.isDarkMode,
+                formattedWaitTime: wait,
+                countdownDuration: cooldownState.remainingCooldownTime,
+                icon: config.icons?[2],
+                onTryAgain: () {
+                  onTryAgain?.call();
+                  if (!completer.isCompleted) {
+                    completer.complete(null);
+                  }
+                },
+              );
+            },
+          );
+
+          if (!completer.isCompleted) {
+            return null;
+          }
+          return await completer.future;
         }
 
         if (cooldownState.isBlocked) {
@@ -110,18 +139,6 @@ class FlutterLivenessDetectionRandomizedPlugin {
             config: config,
           );
         }
-
-        await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => LivenessCooldownWidget(
-              cooldownState: cooldownState,
-              isDarkMode: config.isDarkMode,
-              maxFailedAttempts: config.maxFailedAttempts,
-            ),
-          ),
-        );
-
-        return null;
       }
     }
 
@@ -139,13 +156,12 @@ class FlutterLivenessDetectionRandomizedPlugin {
       } else {
         final updatedState = await LivenessCooldownService.instance.recordFailedAttempt();
 
-        if (context.mounted && isBottomSheetUI) {
+        if (context.mounted) {
           if (updatedState.isBlocked) {
-            final wait = _formatMinutesSeconds(
-              updatedState.remainingCooldownTime,
-            );
+
             final completer = Completer<String?>();
             bool didStartCapture = false;
+
             await showModalBottomSheet(
               context: context,
               isScrollControlled: true,
@@ -154,7 +170,6 @@ class FlutterLivenessDetectionRandomizedPlugin {
                 return LivenessBottomSheetInfoWidget.forType(
                   type: LivenessBottomSheetInfoType.blocked,
                   isDarkMode: config.isDarkMode,
-                  formattedWaitTime: wait,
                   countdownDuration: updatedState.remainingCooldownTime,
                   icon: config.icons?[2],
                   onTryAgain: () async {
@@ -176,6 +191,36 @@ class FlutterLivenessDetectionRandomizedPlugin {
               return null;
             }
             return await completer.future;
+
+          } else if (updatedState.isInCooldown) {
+            final wait = _formatMinutesSeconds(updatedState.remainingCooldownTime);
+            final completer = Completer<String?>();
+
+            await showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (context) {
+                return LivenessBottomSheetInfoWidget.forType(
+                  type: LivenessBottomSheetInfoType.locked,
+                  isDarkMode: config.isDarkMode,
+                  formattedWaitTime: wait,
+                  countdownDuration: updatedState.remainingCooldownTime,
+                  icon: config.icons?[2],
+                  onTryAgain: () {
+                    onTryAgain?.call();
+                    if (!completer.isCompleted) {
+                      completer.complete(null);
+                    }
+                  },
+                );
+              },
+            );
+
+            if (!completer.isCompleted) {
+              return null;
+            }
+            return await completer.future;
           } else {
             final maxAttempts = config.maxFailedAttempts;
             final attemptsUsed = updatedState.failedAttempts.clamp(
@@ -183,6 +228,7 @@ class FlutterLivenessDetectionRandomizedPlugin {
               maxAttempts,
             );
             final completer = Completer<String?>();
+
             await showModalBottomSheet(
               context: context,
               isScrollControlled: true,
@@ -202,16 +248,18 @@ class FlutterLivenessDetectionRandomizedPlugin {
                 );
               },
             );
+
             if (!completer.isCompleted) {
               return null;
             }
             return await completer.future;
+
           }
         }
       }
     } else {
       // No cooldown tracking: still show timeout sheet if requested.
-      if (capturedFacePath == null && context.mounted && isBottomSheetUI) {
+      if (capturedFacePath == null && context.mounted) {
         final completer = Completer<String?>();
         await showModalBottomSheet(
           context: context,
@@ -221,6 +269,7 @@ class FlutterLivenessDetectionRandomizedPlugin {
             return LivenessBottomSheetInfoWidget.forType(
               type: LivenessBottomSheetInfoType.manyAttempts,
               isDarkMode: config.isDarkMode,
+              attemptsLeftText: 'Failed',
               icon: config.icons?[1],
               onTryAgain: () {
                 onTryAgain?.call();

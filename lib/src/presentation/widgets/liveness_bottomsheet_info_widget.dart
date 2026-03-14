@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-enum LivenessBottomSheetInfoType { manyAttempts, blocked, faceMismatch }
+enum LivenessBottomSheetInfoType { manyAttempts, blocked, locked}
 
 class _RetryCountdownText extends StatefulWidget {
   const _RetryCountdownText({required this.initialRemaining, this.onResult});
@@ -119,13 +119,13 @@ class LivenessBottomSheetInfoWidget extends StatefulWidget {
           onPrimaryAction: onTryAgain,
           isEnableActionTryAgain: true,
         );
-      case LivenessBottomSheetInfoType.blocked:
+      case LivenessBottomSheetInfoType.locked:
         final wait = formattedWaitTime ?? "5:00";
+        final waitWithSuffix = wait.endsWith('s') ? wait : '${wait}s';
         return LivenessBottomSheetInfoWidget(
           key: key,
           title: "Temporarily blocked",
-          message:
-            "For your protection, we’ve temporarily locked this feature after multiple unsuccessful attempts. Please wait $wait before trying again.",
+          message: "For your protection, we’ve temporarily locked this feature after multiple unsuccessful attempts. Please wait $waitWithSuffix before trying again.",
           countdownDuration: countdownDuration ?? Duration.zero,
           colorByType: const Color(0xFFE60013).withOpacity(0.10),
           icon: icon,
@@ -133,16 +133,17 @@ class LivenessBottomSheetInfoWidget extends StatefulWidget {
           onPrimaryAction: onTryAgain,
           isEnableActionTryAgain: false,
         );
-      case LivenessBottomSheetInfoType.faceMismatch:
+      case LivenessBottomSheetInfoType.blocked:
         return LivenessBottomSheetInfoWidget(
           key: key,
-          title: "Face match unsuccessful",
-          message:
-              "Face match unsuccessful. Please make sure your face is clearly visible and matches your ID photo",
+          title: "Temporarily blocked",
+          message: "For your protection, we’ve temporarily locked this feature after multiple unsuccessful attempts. Please take a photo",
+          countdownDuration: countdownDuration ?? Duration.zero,
+          colorByType: const Color(0xFFE60013).withOpacity(0.10),
           icon: icon,
           primaryActionText: "Try Again",
           onPrimaryAction: onTryAgain,
-          isEnableActionTryAgain: true,
+          isEnableActionTryAgain: false,
         );
     }
   }
