@@ -91,6 +91,7 @@ class LivenessBottomSheetInfoWidget extends StatefulWidget {
     this.onPrimaryAction,
     this.colorByType,
     this.isEnableActionTryAgain,
+    this.primaryColor = Colors.black,
   });
 
   final Widget? icon;
@@ -103,6 +104,7 @@ class LivenessBottomSheetInfoWidget extends StatefulWidget {
   final String? primaryActionText;
   final VoidCallback? onPrimaryAction;
   final bool? isEnableActionTryAgain;
+  final Color primaryColor;
 
   factory LivenessBottomSheetInfoWidget.forType({
     Key? key,
@@ -114,6 +116,7 @@ class LivenessBottomSheetInfoWidget extends StatefulWidget {
     Duration? countdownDuration,
     VoidCallback? onTryAgain,
     Widget? icon,
+    Color primaryColor = Colors.black,
   }) {
     final strings = LivenessLocalizations.of(languageCode);
     switch (type) {
@@ -129,6 +132,7 @@ class LivenessBottomSheetInfoWidget extends StatefulWidget {
           primaryActionText: strings.tryAgain(),
           onPrimaryAction: onTryAgain,
           isEnableActionTryAgain: true,
+          primaryColor: primaryColor,
         );
       case LivenessBottomSheetInfoType.locked:
         final wait = formattedWaitTime ?? "5:00";
@@ -144,6 +148,7 @@ class LivenessBottomSheetInfoWidget extends StatefulWidget {
           primaryActionText: strings.tryAgain(),
           onPrimaryAction: onTryAgain,
           isEnableActionTryAgain: false,
+          primaryColor: primaryColor,
         );
       case LivenessBottomSheetInfoType.blocked:
         return LivenessBottomSheetInfoWidget(
@@ -157,6 +162,7 @@ class LivenessBottomSheetInfoWidget extends StatefulWidget {
           primaryActionText: strings.tryAgain(),
           onPrimaryAction: onTryAgain,
           isEnableActionTryAgain: false,
+          primaryColor: primaryColor,
         );
     }
   }
@@ -284,8 +290,8 @@ class _LivenessBottomSheetInfoWidgetState extends State<LivenessBottomSheetInfoW
                             widget.onPrimaryAction?.call();
                           },
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(
-                        color: Color(0xFFE60013),
+                      side: BorderSide(
+                        color: widget.primaryColor,
                         width: 1.5,
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -296,7 +302,7 @@ class _LivenessBottomSheetInfoWidgetState extends State<LivenessBottomSheetInfoW
                     child: Text(
                       widget.primaryActionText ??
                           LivenessLocalizations.of(widget.languageCode).ok(),
-                      style: const TextStyle(color: Color(0xFFE60013)),
+                      style: TextStyle(color: widget.primaryColor),
                     ),
                   ),
                 ),

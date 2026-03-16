@@ -85,6 +85,7 @@ class FlutterLivenessDetectionRandomizedPlugin {
                 isDarkMode: config.isDarkMode,
                 languageCode: config.languageCode,
                 countdownDuration: cooldownState.remainingCooldownTime,
+                primaryColor: config.primaryColor,
                 icon: config.icons?[2],
                 onTryAgain: () async {
                   didStartCapture = true;
@@ -120,6 +121,7 @@ class FlutterLivenessDetectionRandomizedPlugin {
                 isDarkMode: config.isDarkMode,
                 languageCode: config.languageCode,
                 formattedWaitTime: wait,
+                primaryColor: config.primaryColor,
                 countdownDuration: cooldownState.remainingCooldownTime,
                 icon: config.icons?[2],
                 onTryAgain: () {
@@ -177,6 +179,7 @@ class FlutterLivenessDetectionRandomizedPlugin {
                   isDarkMode: config.isDarkMode,
                   languageCode: config.languageCode,
                   countdownDuration: updatedState.remainingCooldownTime,
+                  primaryColor: config.primaryColor,
                   icon: config.icons?[2],
                   onTryAgain: () async {
                     didStartCapture = true;
@@ -211,6 +214,7 @@ class FlutterLivenessDetectionRandomizedPlugin {
                   type: LivenessBottomSheetInfoType.locked,
                   isDarkMode: config.isDarkMode,
                   languageCode: config.languageCode,
+                  primaryColor: config.primaryColor,
                   formattedWaitTime: wait,
                   countdownDuration: updatedState.remainingCooldownTime,
                   icon: config.icons?[2],
@@ -245,6 +249,7 @@ class FlutterLivenessDetectionRandomizedPlugin {
                   type: LivenessBottomSheetInfoType.manyAttempts,
                   isDarkMode: config.isDarkMode,
                   languageCode: config.languageCode,
+                  primaryColor: config.primaryColor,
                   attemptsLeftText: strings.attemptsText(
                     attemptsUsed,
                     maxAttempts,
@@ -281,6 +286,7 @@ class FlutterLivenessDetectionRandomizedPlugin {
               type: LivenessBottomSheetInfoType.manyAttempts,
               isDarkMode: config.isDarkMode,
               languageCode: config.languageCode,
+              primaryColor: config.primaryColor,
               attemptsLeftText: strings.failedText(),
               icon: config.icons?[1],
               onTryAgain: () {
