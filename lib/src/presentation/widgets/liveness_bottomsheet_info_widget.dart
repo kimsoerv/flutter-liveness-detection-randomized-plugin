@@ -1,13 +1,19 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_liveness_detection_randomized_plugin/src/localization/liveness_localizations.dart';
 
 enum LivenessBottomSheetInfoType { manyAttempts, blocked, locked}
 
 class _RetryCountdownText extends StatefulWidget {
-  const _RetryCountdownText({required this.initialRemaining, this.onResult});
+  const _RetryCountdownText({
+    required this.initialRemaining,
+    required this.languageCode,
+    this.onResult,
+  });
 
   final Duration initialRemaining;
+  final String languageCode;
   final Function(bool isCountZero)? onResult;
 
   @override
@@ -60,8 +66,9 @@ class _RetryCountdownTextState extends State<_RetryCountdownText> {
 
   @override
   Widget build(BuildContext context) {
+    final strings = LivenessLocalizations.of(widget.languageCode);
     return Text(
-      'Retry in: ${_format(_remaining)}',
+      strings.retryIn(_format(_remaining)),
       style: const TextStyle(
         color: Color(0xFFE60013),
         fontWeight: FontWeight.w700,
@@ -76,6 +83,7 @@ class LivenessBottomSheetInfoWidget extends StatefulWidget {
     super.key,
     required this.title,
     required this.message,
+    required this.languageCode,
     this.icon,
     this.badgeText,
     this.countdownDuration,
@@ -88,6 +96,7 @@ class LivenessBottomSheetInfoWidget extends StatefulWidget {
   final Widget? icon;
   final String title;
   final String message;
+  final String languageCode;
   final String? badgeText;
   final Duration? countdownDuration;
   final Color? colorByType;
@@ -99,23 +108,25 @@ class LivenessBottomSheetInfoWidget extends StatefulWidget {
     Key? key,
     required LivenessBottomSheetInfoType type,
     required bool isDarkMode,
+    String? languageCode,
     String? formattedWaitTime,
     String? attemptsLeftText,
     Duration? countdownDuration,
     VoidCallback? onTryAgain,
     Widget? icon,
   }) {
+    final strings = LivenessLocalizations.of(languageCode);
     switch (type) {
       case LivenessBottomSheetInfoType.manyAttempts:
         return LivenessBottomSheetInfoWidget(
           key: key,
-          title: "Scan timed out",
-          message:
-              "We couldn't complete the scan in time. Please ensure you are in a well-lit area and follow the prompts closely.",
+          title: strings.scanTimedOutTitle(),
+          message: strings.scanTimedOutMessage(),
+          languageCode: strings.languageCode,
           badgeText: attemptsLeftText,
           colorByType: const Color(0xFFDDAF59),
           icon: icon,
-          primaryActionText: "Try Again",
+          primaryActionText: strings.tryAgain(),
           onPrimaryAction: onTryAgain,
           isEnableActionTryAgain: true,
         );
@@ -124,24 +135,26 @@ class LivenessBottomSheetInfoWidget extends StatefulWidget {
         final waitWithSuffix = wait.endsWith('s') ? wait : '${wait}s';
         return LivenessBottomSheetInfoWidget(
           key: key,
-          title: "Temporarily blocked",
-          message: "For your protection, we’ve temporarily locked this feature after multiple unsuccessful attempts. Please wait $waitWithSuffix before trying again.",
+          title: strings.temporarilyBlockedTitle(),
+          message: strings.temporarilyLockedMessage(waitWithSuffix),
+          languageCode: strings.languageCode,
           countdownDuration: countdownDuration ?? Duration.zero,
           colorByType: const Color(0xFFE60013).withOpacity(0.10),
           icon: icon,
-          primaryActionText: "Try Again",
+          primaryActionText: strings.tryAgain(),
           onPrimaryAction: onTryAgain,
           isEnableActionTryAgain: false,
         );
       case LivenessBottomSheetInfoType.blocked:
         return LivenessBottomSheetInfoWidget(
           key: key,
-          title: "Temporarily blocked",
-          message: "For your protection, we’ve temporarily locked this feature after multiple unsuccessful attempts. Please take a photo",
+          title: strings.temporarilyBlockedTitle(),
+          message: strings.temporarilyBlockedMessage(),
+          languageCode: strings.languageCode,
           countdownDuration: countdownDuration ?? Duration.zero,
           colorByType: const Color(0xFFE60013).withOpacity(0.10),
           icon: icon,
-          primaryActionText: "Try Again",
+          primaryActionText: strings.tryAgain(),
           onPrimaryAction: onTryAgain,
           isEnableActionTryAgain: false,
         );
@@ -248,6 +261,7 @@ class _LivenessBottomSheetInfoWidgetState extends State<LivenessBottomSheetInfoW
                   ),
                   child: _RetryCountdownText(
                     initialRemaining: widget.countdownDuration!,
+                    languageCode: widget.languageCode,
                     onResult: (isCountZero) {
                      setState(() {
                        isEnableAction = isCountZero;
@@ -280,7 +294,8 @@ class _LivenessBottomSheetInfoWidgetState extends State<LivenessBottomSheetInfoW
                       ),
                     ),
                     child: Text(
-                      widget.primaryActionText ?? "OK",
+                      widget.primaryActionText ??
+                          LivenessLocalizations.of(widget.languageCode).ok(),
                       style: const TextStyle(color: Color(0xFFE60013)),
                     ),
                   ),

@@ -1,14 +1,17 @@
 import 'package:flutter_liveness_detection_randomized_plugin/index.dart';
+import 'package:flutter_liveness_detection_randomized_plugin/src/localization/liveness_localizations.dart';
 
 class LivenessDetectionTutorialScreen extends StatefulWidget {
   final VoidCallback onStartTap;
   final bool isDarkMode;
   final int? duration;
+  final String languageCode;
   const LivenessDetectionTutorialScreen(
       {super.key,
       required this.onStartTap,
       this.isDarkMode = false,
-      required this.duration});
+      required this.duration,
+      this.languageCode = 'en'});
 
   @override
   State<LivenessDetectionTutorialScreen> createState() =>
@@ -24,6 +27,7 @@ class _LivenessDetectionTutorialScreenState
 
   @override
   Widget build(BuildContext context) {
+    final strings = LivenessLocalizations.of(widget.languageCode);
     return Scaffold(
       backgroundColor: widget.isDarkMode ? Colors.black : Colors.white,
       body: SafeArea(
@@ -37,7 +41,7 @@ class _LivenessDetectionTutorialScreenState
               height: 16,
             ),
             Text(
-              'Liveness Detection - Tutorial',
+              strings.tutorialTitle(),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 24,
@@ -76,13 +80,13 @@ class _LivenessDetectionTutorialScreenState
                               widget.isDarkMode ? Colors.white : Colors.black),
                     ),
                     subtitle: Text(
-                      "Make sure you are in an area that has sufficient lighting and that your ears are not covered by anything",
+                      strings.tutorialSufficientLightingDescription(),
                       style: TextStyle(
                           color:
                               widget.isDarkMode ? Colors.white : Colors.black),
                     ),
                     title: Text(
-                      "Sufficient Lighting",
+                      strings.tutorialSufficientLightingTitle(),
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -100,13 +104,13 @@ class _LivenessDetectionTutorialScreenState
                               widget.isDarkMode ? Colors.white : Colors.black),
                     ),
                     subtitle: Text(
-                      "Hold the phone at eye level and look straight at the camera",
+                      strings.tutorialStraightAheadDescription(),
                       style: TextStyle(
                           color:
                               widget.isDarkMode ? Colors.white : Colors.black),
                     ),
                     title: Text(
-                      "Straight Ahead View",
+                      strings.tutorialStraightAheadTitle(),
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -124,13 +128,15 @@ class _LivenessDetectionTutorialScreenState
                               widget.isDarkMode ? Colors.white : Colors.black),
                     ),
                     subtitle: Text(
-                      "The time limit given for the liveness detection system verification process is ${widget.duration ?? 45} seconds",
+                      strings.tutorialTimeLimitDescription(
+                        widget.duration ?? 45,
+                      ),
                       style: TextStyle(
                           color:
                               widget.isDarkMode ? Colors.white : Colors.black),
                     ),
                     title: Text(
-                      "Time Limit Verification",
+                      strings.tutorialTimeLimitTitle(),
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -156,18 +162,16 @@ class _LivenessDetectionTutorialScreenState
               ),
               icon: const Icon(Icons.camera_alt_outlined),
               onPressed: () => widget.onStartTap(),
-              label: const Text(
-                "Start the Liveness Detection System",
-              ),
+              label: Text(strings.tutorialStartButton()),
             ),
             const SizedBox(
               height: 10,
             ),
             const Spacer(),
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
+                const Icon(
                   Icons.info_outline_rounded,
                   color: Colors.grey,
                   size: 15,
@@ -176,8 +180,8 @@ class _LivenessDetectionTutorialScreenState
                   width: 10,
                 ),
                 Text(
-                  'Package Version: 1.1.0',
-                  style: TextStyle(color: Colors.grey),
+                  strings.packageVersionLabel('1.1.0'),
+                  style: const TextStyle(color: Colors.grey),
                 )
               ],
             )

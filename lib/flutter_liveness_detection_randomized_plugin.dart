@@ -1,4 +1,5 @@
 import 'package:flutter_liveness_detection_randomized_plugin/index.dart';
+import 'package:flutter_liveness_detection_randomized_plugin/src/localization/liveness_localizations.dart';
 
 class FlutterLivenessDetectionRandomizedPlugin {
   FlutterLivenessDetectionRandomizedPlugin._privateConstructor();
@@ -58,6 +59,8 @@ class FlutterLivenessDetectionRandomizedPlugin {
     required LivenessDetectionConfig config,
     final VoidCallback? onTryAgain,
   }) async {
+    await LivenessLocalizations.load(config.languageCode);
+    final strings = LivenessLocalizations.of(config.languageCode);
 
     if (config.enableCooldownOnFailure) {
       await LivenessCooldownService.instance.configureAndNormalize(
@@ -80,6 +83,7 @@ class FlutterLivenessDetectionRandomizedPlugin {
               return LivenessBottomSheetInfoWidget.forType(
                 type: LivenessBottomSheetInfoType.blocked,
                 isDarkMode: config.isDarkMode,
+                languageCode: config.languageCode,
                 countdownDuration: cooldownState.remainingCooldownTime,
                 icon: config.icons?[2],
                 onTryAgain: () async {
@@ -114,6 +118,7 @@ class FlutterLivenessDetectionRandomizedPlugin {
               return LivenessBottomSheetInfoWidget.forType(
                 type: LivenessBottomSheetInfoType.locked,
                 isDarkMode: config.isDarkMode,
+                languageCode: config.languageCode,
                 formattedWaitTime: wait,
                 countdownDuration: cooldownState.remainingCooldownTime,
                 icon: config.icons?[2],
@@ -170,6 +175,7 @@ class FlutterLivenessDetectionRandomizedPlugin {
                 return LivenessBottomSheetInfoWidget.forType(
                   type: LivenessBottomSheetInfoType.blocked,
                   isDarkMode: config.isDarkMode,
+                  languageCode: config.languageCode,
                   countdownDuration: updatedState.remainingCooldownTime,
                   icon: config.icons?[2],
                   onTryAgain: () async {
@@ -204,6 +210,7 @@ class FlutterLivenessDetectionRandomizedPlugin {
                 return LivenessBottomSheetInfoWidget.forType(
                   type: LivenessBottomSheetInfoType.locked,
                   isDarkMode: config.isDarkMode,
+                  languageCode: config.languageCode,
                   formattedWaitTime: wait,
                   countdownDuration: updatedState.remainingCooldownTime,
                   icon: config.icons?[2],
@@ -237,7 +244,11 @@ class FlutterLivenessDetectionRandomizedPlugin {
                 return LivenessBottomSheetInfoWidget.forType(
                   type: LivenessBottomSheetInfoType.manyAttempts,
                   isDarkMode: config.isDarkMode,
-                  attemptsLeftText: 'Attempts: $attemptsUsed/$maxAttempts',
+                  languageCode: config.languageCode,
+                  attemptsLeftText: strings.attemptsText(
+                    attemptsUsed,
+                    maxAttempts,
+                  ),
                   icon: config.icons?[1],
                   onTryAgain: () {
                     onTryAgain?.call();
@@ -269,7 +280,8 @@ class FlutterLivenessDetectionRandomizedPlugin {
             return LivenessBottomSheetInfoWidget.forType(
               type: LivenessBottomSheetInfoType.manyAttempts,
               isDarkMode: config.isDarkMode,
-              attemptsLeftText: 'Failed',
+              languageCode: config.languageCode,
+              attemptsLeftText: strings.failedText(),
               icon: config.icons?[1],
               onTryAgain: () {
                 onTryAgain?.call();

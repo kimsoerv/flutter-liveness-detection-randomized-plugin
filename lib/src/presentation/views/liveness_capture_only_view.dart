@@ -4,6 +4,8 @@ import 'package:screen_brightness/screen_brightness.dart';
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 
+import '../../localization/liveness_localizations.dart';
+
 class LivenessCaptureOnlyView extends StatefulWidget {
   final LivenessDetectionConfig config;
 
@@ -164,6 +166,7 @@ class _LivenessCaptureOnlyViewState extends State<LivenessCaptureOnlyView> {
   Widget build(BuildContext context) {
     final backgroundColor = widget.config.backgroundColor ??
         (widget.config.isDarkMode ? Colors.black : const Color(0xFFF7F7F7));
+    final strings = LivenessLocalizations.of(widget.config.languageCode);
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -236,7 +239,7 @@ class _LivenessCaptureOnlyViewState extends State<LivenessCaptureOnlyView> {
                                     vertical: 12,
                                   ),
                                 ),
-                                child: const Text('Retake'),
+                                child: Text(strings.retake()),
                               ),
                               const SizedBox(width: 16),
                               ElevatedButton(
@@ -251,7 +254,7 @@ class _LivenessCaptureOnlyViewState extends State<LivenessCaptureOnlyView> {
                                     vertical: 12,
                                   ),
                                 ),
-                                child: const Text('OK'),
+                                child: Text(strings.ok()),
                               ),
                             ],
                           ),

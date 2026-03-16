@@ -71,6 +71,7 @@ final String? response = await FlutterLivenessDetectionRandomizedPlugin.instance
     
     // UI Settings
     isDarkMode: false, // Dark/light theme
+    languageCode: 'en', // 'en', 'km', 'zh'
     showCurrentStep: true, // Show step counter
     isEnableSnackBar: true, // Show result notifications
     shuffleListWithSmileLast: true, // Randomize challenges with smile last
@@ -93,6 +94,17 @@ final String? response = await FlutterLivenessDetectionRandomizedPlugin.instance
   ),
 );
 ```
+
+## Localization (JSON)
+
+The plugin loads JSON files from `lib/src/localization/i18n/` based on `languageCode`.
+
+Available files:
+- `assets/i18n/en.json`
+- `assets/i18n/km.json`
+- `assets/i18n/zh.json`
+
+You can edit these JSON files or add a new one and set `languageCode` to match. Use placeholders like `{seconds}`, `{max}`, `{used}`, `{wait}`, `{version}`, `{time}`.
 
 ## Configuration Parameters 📋
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_liveness_detection_randomized_plugin/src/models/liveness_detection_cooldown.dart';
+import 'package:flutter_liveness_detection_randomized_plugin/src/localization/liveness_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LivenessCooldownWidget extends StatefulWidget {
@@ -8,6 +9,7 @@ class LivenessCooldownWidget extends StatefulWidget {
   final bool isDarkMode;
   final VoidCallback? onCooldownComplete;
   final int maxFailedAttempts;
+  final String languageCode;
 
   const LivenessCooldownWidget({
     super.key,
@@ -15,6 +17,7 @@ class LivenessCooldownWidget extends StatefulWidget {
     this.isDarkMode = true,
     this.onCooldownComplete,
     this.maxFailedAttempts = 3,
+    this.languageCode = 'en',
   });
 
   @override
@@ -121,6 +124,7 @@ class _LivenessCooldownWidgetState extends State<LivenessCooldownWidget> with Wi
 
   @override
   Widget build(BuildContext context) {
+    final strings = LivenessLocalizations.of(widget.languageCode);
     return Scaffold(
       backgroundColor: widget.isDarkMode ? Colors.black : Colors.white,
       body: Center(
@@ -136,7 +140,7 @@ class _LivenessCooldownWidgetState extends State<LivenessCooldownWidget> with Wi
               ),
               const SizedBox(height: 24),
               Text(
-                'Too Many Failed Attempts',
+                strings.tooManyFailedAttemptsTitle(),
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -146,7 +150,7 @@ class _LivenessCooldownWidgetState extends State<LivenessCooldownWidget> with Wi
               ),
               const SizedBox(height: 16),
               Text(
-                'You have failed liveness verification ${widget.maxFailedAttempts} times.\nPlease wait before trying again.',
+                strings.failedAttemptsMessage(widget.maxFailedAttempts),
                 style: TextStyle(
                   fontSize: 16,
                   color: widget.isDarkMode ? Colors.white70 : Colors.black54,
@@ -163,7 +167,7 @@ class _LivenessCooldownWidgetState extends State<LivenessCooldownWidget> with Wi
                 child: Column(
                   children: [
                     Text(
-                      'Remaining Wait Time',
+                      strings.remainingWaitTime(),
                       style: TextStyle(
                         fontSize: 14,
                         color: widget.isDarkMode ? Colors.white70 : Colors.black54,
@@ -190,7 +194,7 @@ class _LivenessCooldownWidgetState extends State<LivenessCooldownWidget> with Wi
                   foregroundColor: widget.isDarkMode ? Colors.white : Colors.black,
                   padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                 ),
-                child: const Text('Back'),
+                child: Text(strings.back()),
               ),
             ],
           ),

@@ -42,3 +42,6 @@ flutter:
   assets:
     - packages/flutter_liveness_detection_randomized_plugin/src/core/assets/face-id-anim.json
     - packages/flutter_liveness_detection_randomized_plugin/src/core/assets/face-detected.json
+    - assets/i18n/en.json
+    - assets/i18n/km.json
+    - assets/i18n/zh.json

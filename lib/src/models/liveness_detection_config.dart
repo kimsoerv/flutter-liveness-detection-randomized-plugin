@@ -25,6 +25,7 @@ class LivenessDetectionConfig {
   final String? title;
   final Color? backgroundColor;
   final List<Widget>? icons;
+  final String languageCode;
 
   LivenessDetectionConfig({
     this.startWithInfoScreen = false,
@@ -49,6 +50,7 @@ class LivenessDetectionConfig {
     this.title,
     this.backgroundColor,
     this.icons,
+    this.languageCode = 'en',
   }) : assert(
          !useCustomizedLabel || customizedLabel != null,
          'customizedLabel must not be null when useCustomizedLabel is true',

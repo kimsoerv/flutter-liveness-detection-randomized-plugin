@@ -1,16 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_liveness_detection_randomized_plugin/index.dart';
+import 'package:flutter_liveness_detection_randomized_plugin/src/localization/liveness_localizations.dart';
 import 'package:flutter_liveness_detection_randomized_plugin/src/presentation/widgets/circular_progress_widget/circular_progress_widget.dart';
 import 'package:lottie/lottie.dart';
-
-const List<String> _defaultTips = [
-  'Position your face in the oval',
-  'Look directly at the camera',
-  'Ensure good lighting on your face',
-  'Remove your glasses or mask',
-];
-
-const String _defaultTipsTitle = 'Tips for the best result';
 
 class LivenessDetectionStepOverlayWidget extends StatefulWidget {
   final List<LivenessDetectionStepItem> steps;
@@ -26,6 +18,7 @@ class LivenessDetectionStepOverlayWidget extends StatefulWidget {
   final List<String>? tips;
   final String? tipsTitle;
   final String? title;
+  final String languageCode;
 
   const LivenessDetectionStepOverlayWidget({
     super.key,
@@ -42,6 +35,7 @@ class LivenessDetectionStepOverlayWidget extends StatefulWidget {
     this.tips,
     this.tipsTitle,
     this.title,
+    this.languageCode = 'en',
   });
 
   @override
@@ -219,7 +213,8 @@ class LivenessDetectionStepOverlayWidgetState
   }
 
   Widget _buildTitleBar() {
-    final title = widget.title ?? 'Face Verification';
+    final strings = LivenessLocalizations.of(widget.languageCode);
+    final title = widget.title ?? strings.faceVerificationTitle();
     final textColor =
         widget.isDarkMode ? Colors.white : Colors.black;
 
@@ -308,6 +303,7 @@ class LivenessDetectionStepOverlayWidgetState
 
   Widget _buildFaceDetectionStatus() {
     if (widget.isFaceDetected) return const SizedBox.shrink();
+    final strings = LivenessLocalizations.of(widget.languageCode);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -333,7 +329,7 @@ class LivenessDetectionStepOverlayWidgetState
         ),
         const SizedBox(width: 16),
         Text(
-          'User Face Not Found...',
+          strings.faceNotFound(),
           style: TextStyle(
             color: widget.isDarkMode ? Colors.white : Colors.black,
           ),
@@ -358,8 +354,9 @@ class LivenessDetectionStepOverlayWidgetState
   }
 
   Widget _buildTipsSection() {
-    final tipsList = widget.tips ?? _defaultTips;
-    final title = widget.tipsTitle ?? _defaultTipsTitle;
+    final strings = LivenessLocalizations.of(widget.languageCode);
+    final tipsList = widget.tips ?? strings.tipsList();
+    final title = widget.tipsTitle ?? strings.tipsTitle();
     if (tipsList.isEmpty) return const SizedBox.shrink();
 
     final tipColor = Colors.black;

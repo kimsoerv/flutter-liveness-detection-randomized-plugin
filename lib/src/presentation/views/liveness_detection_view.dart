@@ -1,6 +1,7 @@
 // ignore_for_file: depend_on_referenced_packages
 import 'package:flutter_liveness_detection_randomized_plugin/index.dart';
 import 'package:flutter_liveness_detection_randomized_plugin/src/core/constants/liveness_detection_step_constant.dart';
+import 'package:flutter_liveness_detection_randomized_plugin/src/localization/liveness_localizations.dart';
 import 'package:collection/collection.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:image/image.dart' as img;
@@ -123,6 +124,7 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
 
   List<LivenessDetectionStepItem> customizedLivenessLabel(
     LivenessDetectionLabelModel label,
+    LivenessDetectionLabelModel defaults,
   ) {
     List<LivenessDetectionStepItem> customizedSteps = [];
 
@@ -131,7 +133,7 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
       customizedSteps.add(
         LivenessDetectionStepItem(
           step: LivenessDetectionStep.blink,
-          title: label.blink ?? "Blink 2-3 Times",
+          title: label.blink ?? defaults.blink ?? "Blink 2-3 Times",
           icon: label.iconBlink,
         ),
       );
@@ -142,7 +144,7 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
       customizedSteps.add(
         LivenessDetectionStepItem(
           step: LivenessDetectionStep.lookRight,
-          title: label.lookRight ?? "Look RIGHT",
+          title: label.lookRight ?? defaults.lookRight ?? "Look RIGHT",
           icon: label.iconLookRight,
         ),
       );
@@ -153,7 +155,7 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
       customizedSteps.add(
         LivenessDetectionStepItem(
           step: LivenessDetectionStep.lookLeft,
-          title: label.lookLeft ?? "Look LEFT",
+          title: label.lookLeft ?? defaults.lookLeft ?? "Look LEFT",
           icon: label.iconLookLeft,
         ),
       );
@@ -164,7 +166,7 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
       customizedSteps.add(
         LivenessDetectionStepItem(
           step: LivenessDetectionStep.lookUp,
-          title: label.lookUp ?? "Look UP",
+          title: label.lookUp ?? defaults.lookUp ?? "Look UP",
           icon: label.iconLookUp,
         ),
       );
@@ -175,7 +177,7 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
       customizedSteps.add(
         LivenessDetectionStepItem(
           step: LivenessDetectionStep.lookDown,
-          title: label.lookDown ?? "Look DOWN",
+          title: label.lookDown ?? defaults.lookDown ?? "Look DOWN",
           icon: label.iconLookDown,
         ),
       );
@@ -186,7 +188,7 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
       customizedSteps.add(
         LivenessDetectionStepItem(
           step: LivenessDetectionStep.smile,
-          title: label.smile ?? "Smile",
+          title: label.smile ?? defaults.smile ?? "Smile",
           icon: label.iconSmile,
         ),
       );
@@ -197,6 +199,7 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
 
   @override
   void initState() {
+    _preloadLocalizations();
     _preInitCallBack();
     super.initState();
     if (widget.config.enableCooldownOnFailure) {
@@ -208,6 +211,11 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
       LivenessCooldownService.instance.initializeCooldownTimer();
     }
     WidgetsBinding.instance.addPostFrameCallback((_) => _postFrameCallBack());
+  }
+
+  Future<void> _preloadLocalizations() async {
+    await LivenessLocalizations.load(widget.config.languageCode);
+    if (mounted) setState(() {});
   }
 
   @override
@@ -429,6 +437,7 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
   }
 
   void _onDetectionCompleted({XFile? imgToReturn}) async {
+    final strings = LivenessLocalizations.of(widget.config.languageCode);
     final String? imgPath = imgToReturn?.path;
 
     if (imgPath != null) {
@@ -441,8 +450,10 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
       final snackBar = SnackBar(
         content: Text(
           imgToReturn == null
-              ? 'Verification of liveness detection failed, please try again. (Exceeds time limit ${widget.config.durationLivenessVerify ?? 45} second.)'
-              : 'Verification of liveness detection success!',
+              ? strings.verificationFailed(
+                widget.config.durationLivenessVerify ?? 45,
+              )
+              : strings.verificationSuccess(),
         ),
       );
       if (!mounted) return;
@@ -482,14 +493,16 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
   /// Initialize and shuffle steps fresh each time
   void _initializeShuffledSteps() {
     List<LivenessDetectionStepItem> baseSteps;
+    final strings = LivenessLocalizations.of(widget.config.languageCode);
 
     if (widget.config.useCustomizedLabel &&
         widget.config.customizedLabel != null) {
-      baseSteps = customizedLivenessLabel(widget.config.customizedLabel!);
+      baseSteps = customizedLivenessLabel(
+        widget.config.customizedLabel!,
+        strings.defaultLabels(),
+      );
     } else {
-      baseSteps = List.from(
-        stepLiveness,
-      ); // Create a copy to avoid modifying the original
+      baseSteps = buildDefaultSteps(widget.config.languageCode);
     }
 
     shuffleListLivenessChallenge(
@@ -524,6 +537,7 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
             : LivenessDetectionTutorialScreen(
                 duration: widget.config.durationLivenessVerify ?? 45,
                 isDarkMode: widget.config.isDarkMode,
+                languageCode: widget.config.languageCode,
                 onStartTap: () {
                   if (mounted) setState(() => _isInfoStepCompleted = true);
                   _startLiveFeed();
@@ -553,6 +567,7 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
           showDurationUiText: widget.config.showDurationUiText,
           isDarkMode: widget.config.isDarkMode,
           isFaceDetected: _faceDetectedState,
+          languageCode: widget.config.languageCode,
           camera: CameraPreview(_cameraController!),
           key: _stepsKey,
           steps: _getStepsToUse(),
