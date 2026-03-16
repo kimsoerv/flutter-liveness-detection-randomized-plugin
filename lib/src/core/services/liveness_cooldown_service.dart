@@ -134,7 +134,7 @@ class LivenessCooldownService {
   }
 
   Future<LivenessDetectionCooldown> recordSuccessfulAttempt() async {
-    return await _resetCooldown(clearRounds: true, clearBlocked: true);
+    return await _resetCooldown(clearRounds: true, clearBlocked: false);
   }
 
   /// Clears failed-attempts and any active cooldown.
