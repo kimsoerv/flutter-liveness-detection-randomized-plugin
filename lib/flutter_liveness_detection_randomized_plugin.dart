@@ -58,9 +58,12 @@ class FlutterLivenessDetectionRandomizedPlugin {
     required BuildContext context,
     required LivenessDetectionConfig config,
     final VoidCallback? onTryAgain,
+    final Function(LivenessDetectionCooldown value)? onChangeLivenessDetectionCooldown,
   }) async {
     await LivenessLocalizations.load(config.languageCode);
     final strings = LivenessLocalizations.of(config.languageCode);
+
+
 
     if (config.enableCooldownOnFailure) {
       await LivenessCooldownService.instance.configureAndNormalize(
@@ -70,6 +73,8 @@ class FlutterLivenessDetectionRandomizedPlugin {
       );
 
       final cooldownState = await LivenessCooldownService.instance.getCooldownState();
+      onChangeLivenessDetectionCooldown!(cooldownState);
+
       if ((cooldownState.isInCooldown || cooldownState.isBlocked) && context.mounted) {
         if (cooldownState.isBlocked) {
           final completer = Completer<String?>();
@@ -162,6 +167,7 @@ class FlutterLivenessDetectionRandomizedPlugin {
         await LivenessCooldownService.instance.recordSuccessfulAttempt();
       } else {
         final updatedState = await LivenessCooldownService.instance.recordFailedAttempt();
+        onChangeLivenessDetectionCooldown!(updatedState);
 
         if (context.mounted) {
           if (updatedState.isBlocked) {
