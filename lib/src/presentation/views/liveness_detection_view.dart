@@ -507,9 +507,10 @@ class _LivenessDetectionScreenState extends State<LivenessDetectionView> {
 
     shuffleListLivenessChallenge(
       list: baseSteps,
-      isSmileLast: widget.config.useCustomizedLabel
-          ? false
-          : widget.config.shuffleListWithSmileLast,
+      // isSmileLast: widget.config.useCustomizedLabel
+      //     ? false
+      //     : widget.config.shuffleListWithSmileLast,
+      isSmileLast: widget.config.shuffleListWithSmileLast,
     );
 
     _shuffledSteps = baseSteps;
