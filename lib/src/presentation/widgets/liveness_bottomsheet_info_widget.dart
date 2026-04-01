@@ -135,7 +135,8 @@ class LivenessBottomSheetInfoWidget extends StatefulWidget {
           primaryColor: primaryColor,
         );
       case LivenessBottomSheetInfoType.locked:
-        final wait = formattedWaitTime ?? "5:00";
+        // final wait = formattedWaitTime ?? "5:00";
+        const wait = "5:00";
         final waitWithSuffix = wait.endsWith('s') ? wait : '${wait}s';
         return LivenessBottomSheetInfoWidget(
           key: key,
