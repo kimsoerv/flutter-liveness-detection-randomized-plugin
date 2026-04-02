@@ -272,7 +272,7 @@ class LivenessDetectionStepOverlayWidgetState
       mainAxisSize: MainAxisSize.max,
       children: [
         _buildCircularCamera(),
-        _buildFaceDetectionStatus(),
+        // _buildFaceDetectionStatus(),
         Visibility(
           visible: _pageViewVisible,
           replacement: const CircularProgressIndicator.adaptive(),
@@ -316,7 +316,7 @@ class LivenessDetectionStepOverlayWidgetState
                   width: 22,
                 )
               : ColorFiltered(
-                  colorFilter: ColorFilter.mode(
+                  colorFilter: const ColorFilter.mode(
                     Colors.black,
                     BlendMode.modulate,
                   ),
