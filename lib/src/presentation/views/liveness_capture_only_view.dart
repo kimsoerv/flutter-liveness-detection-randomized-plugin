@@ -169,7 +169,7 @@ class _LivenessCaptureOnlyViewState extends State<LivenessCaptureOnlyView> {
     final strings = LivenessLocalizations.of(widget.config.languageCode);
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: Colors.black,
       body: _isInitializing ||
               _cameraController == null ||
               _cameraController?.value.isInitialized == false
@@ -177,7 +177,7 @@ class _LivenessCaptureOnlyViewState extends State<LivenessCaptureOnlyView> {
           : Stack(
               children: [
                 if (_capturedImage == null)
-                  CameraPreview(_cameraController!)
+                  Center(child: CameraPreview(_cameraController!))
                 else
                   Positioned.fill(
                     child: Image.file(
@@ -196,18 +196,16 @@ class _LivenessCaptureOnlyViewState extends State<LivenessCaptureOnlyView> {
                         Navigator.of(context).pop(null);
                       }
                     },
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.close,
-                      color: widget.config.isDarkMode
-                          ? Colors.white
-                          : Colors.black,
+                      color: Colors.white,
                     ),
                   ),
                 ),
                 Positioned(
                   left: 0,
                   right: 0,
-                  bottom: 32,
+                  bottom: 20,
                   child: Center(
                     child: _capturedImage == null
                         ? GestureDetector(
