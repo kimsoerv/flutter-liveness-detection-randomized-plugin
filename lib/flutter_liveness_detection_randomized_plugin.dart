@@ -13,7 +13,18 @@ class FlutterLivenessDetectionRandomizedPlugin {
 
   /// Clears cooldown + failed-attempts stored on device.
   Future<void> resetCooldown() async {
+    // reset TotalFailedAttempts
+    LivenessCooldownService.instance.setTotalFailedAttempts = 0;
     await LivenessCooldownService.instance.reset();
+  }
+
+  /// Get status
+  Future<LivenessDetectionCooldown> getStatusLivenessDetection() async {
+    return await LivenessCooldownService.instance.getCooldownState();
+  }
+
+  int get getTotalFailedAttempts {
+    return LivenessCooldownService.instance.getTotalFailedAttempts;
   }
 
   String _formatMinutesSeconds(Duration duration) {
@@ -58,7 +69,6 @@ class FlutterLivenessDetectionRandomizedPlugin {
     required BuildContext context,
     required LivenessDetectionConfig config,
     final VoidCallback? onTryAgain,
-    final Function(LivenessDetectionCooldown value)? onChangeLivenessDetectionCooldown,
   }) async {
     await LivenessLocalizations.load(config.languageCode);
     final strings = LivenessLocalizations.of(config.languageCode);
@@ -73,7 +83,6 @@ class FlutterLivenessDetectionRandomizedPlugin {
       );
 
       final cooldownState = await LivenessCooldownService.instance.getCooldownState();
-      onChangeLivenessDetectionCooldown!(cooldownState);
 
       if ((cooldownState.isInCooldown || cooldownState.isBlocked) && context.mounted) {
         if (cooldownState.isBlocked) {
@@ -167,7 +176,6 @@ class FlutterLivenessDetectionRandomizedPlugin {
         await LivenessCooldownService.instance.recordSuccessfulAttempt();
       } else {
         final updatedState = await LivenessCooldownService.instance.recordFailedAttempt();
-        onChangeLivenessDetectionCooldown!(updatedState);
 
         if (context.mounted) {
           if (updatedState.isBlocked) {

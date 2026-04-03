@@ -8,6 +8,7 @@ class LivenessCooldownService {
   int _maxFailedAttempts = 3;
   int _cooldownMinutes = 5;
   int _maxCooldownRounds = 2;
+  int _totalFailedAttempts = 0;
 
   static LivenessCooldownService? _instance;
   static LivenessCooldownService get instance {
@@ -25,6 +26,14 @@ class LivenessCooldownService {
     _maxFailedAttempts = maxFailedAttempts;
     _cooldownMinutes = cooldownMinutes;
     _maxCooldownRounds = maxCooldownRounds;
+  }
+
+  int get getTotalFailedAttempts {
+    return _totalFailedAttempts;
+  }
+
+  set setTotalFailedAttempts(int value) {
+    _totalFailedAttempts = value;
   }
 
   /// Configures the service and normalizes any persisted cooldown to the
@@ -83,8 +92,7 @@ class LivenessCooldownService {
     );
 
     // Check if cooldown has expired
-    if (cooldown.isInCooldown &&
-        cooldown.remainingCooldownTime.inSeconds <= 0) {
+    if (cooldown.isInCooldown && cooldown.remainingCooldownTime.inSeconds <= 0) {
       return await _resetCooldown(clearRounds: false, clearBlocked: false);
     }
 
@@ -99,6 +107,8 @@ class LivenessCooldownService {
     }
 
     final newFailedAttempts = currentState.failedAttempts + 1;
+
+    _totalFailedAttempts++;
 
     LivenessDetectionCooldown newState;
 
