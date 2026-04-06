@@ -205,14 +205,14 @@ class _LivenessCaptureOnlyViewState extends State<LivenessCaptureOnlyView> {
                 Positioned(
                   left: 0,
                   right: 0,
-                  bottom: 20,
+                  bottom: MediaQuery.of(context).padding.bottom + 24,
                   child: Center(
                     child: _capturedImage == null
                         ? GestureDetector(
                             onTap: _isTakingPicture ? null : _takePicture,
                             child: Container(
-                              height: 72,
-                              width: 72,
+                              height: 62,
+                              width: 62,
                               decoration: BoxDecoration(
                                 color: _isTakingPicture
                                     ? Colors.grey
