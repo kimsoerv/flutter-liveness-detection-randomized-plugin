@@ -1,4 +1,5 @@
 // ignore_for_file: depend_on_referenced_packages
+import 'package:flutter/foundation.dart';
 import 'package:flutter_liveness_detection_randomized_plugin/index.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:image/image.dart' as img;
@@ -156,6 +157,12 @@ class _LivenessCaptureOnlyViewState extends State<LivenessCaptureOnlyView> {
         _capturedImage = finalImage;
         _isTakingPicture = false;
       });
+
+      if (kDebugMode) {
+        final file = File(_capturedImage!.path);
+        final bytes = await file.length();
+        debugPrint("Image size: $bytes");
+      }
     } catch (e) {
       debugPrint('Error taking picture: $e');
       if (mounted) setState(() => _isTakingPicture = false);
@@ -182,7 +189,9 @@ class _LivenessCaptureOnlyViewState extends State<LivenessCaptureOnlyView> {
                   Positioned.fill(
                     child: Image.file(
                       File(_capturedImage!.path),
-                      fit: BoxFit.cover,
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.high,
+                      isAntiAlias: true,
                     ),
                   ),
                 Positioned(
